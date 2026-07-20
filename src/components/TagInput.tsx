@@ -87,7 +87,7 @@ export const TagInput = ({ tags, setTags, maxTags = 5 }: TagInputProps) => {
           onBlur={() => setIsFocused(false)} // Delay to allow click on suggestions
           placeholder={tags.length < maxTags ? "Add a Tag (Press Enter)" : `Max ${maxTags} tags reached`}
           disabled={tags.length >= maxTags}
-          className="flex-1 bg-transparent text-white outline-none min-w-[120px] py-1"
+          className="flex-1 bg-transparent text-white outline-none min-w-30 py-1"
         />
       </div>
 
