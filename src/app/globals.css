@@ -24,3 +24,25 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+html {
+  overflow-y: scroll;
+}
+
+/* Custom modern scrollbar for Disverz dark theme */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a; /* Matches your --background */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a; /* Nice clean dark gray */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ea580c; /* Disverz orange on hover */
+}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { TagInput } from "@/components/TagInput";
+import { Trash2 } from "lucide-react"; // 👑 ADD THIS IMPORT
 
 interface Channel {
   id: string;
@@ -18,6 +19,8 @@ const EditServerPage = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false); // 👑 ADD THIS STATE
+
   const [channels, setChannels] = useState<Channel[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +33,7 @@ const EditServerPage = () => {
     welcomeChannelId: "",
     challengeChannelId: "",
   });
+  const [isDescTouched, setIsDescTouched] = useState(false);
 
   useEffect(() => {
     const fetchServerAndChannels = async () => {
@@ -120,6 +124,42 @@ const EditServerPage = () => {
     }
   };
 
+  // 👑 The Destructive Strike
+  const handleDelete = async () => {
+    // The Safeguard
+    if (!window.confirm("Are you absolutely sure you want to delete this server? This will wipe all pulse data and rankings. This action cannot be undone.")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/servers/${serverId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to delete server");
+      }
+
+      // Tactical retreat back to the dashboard after successful wipe
+      router.push("/dashboard");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred while deleting.");
+      }
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
@@ -132,15 +172,15 @@ const EditServerPage = () => {
 
  return (
   // 👑 FIXED: Kept the side-by-side grid but restored proper spacing (p-6) and text scaling
-  <div className="w-full min-h-[calc(100vh-64px)] bg-[#0a0a0a] text-white px-6 py-6 flex flex-col justify-center items-center">
-    <div className="max-w-5xl w-full">
+  <div className=" text-white px-4 md:px-0 py-8 flex flex-col justify-center items-center">
+    <div className="max-w-7xl w-full">
       
       {/* Header Block with Clean Font Weights */}
       <div className="mb-6">
         <Link href="/dashboard" className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 mb-2 w-fit">
           ← Back to Command Center
         </Link>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Edit {formData.name}</h1>
+        <h1 className="text-3xl font-bold text-white tracking-tight mt-3">Edit {formData.name}</h1>
         <p className="text-sm text-gray-400">{"Configure your server's public profile and bot mechanics."}</p>
       </div>
 
@@ -158,15 +198,41 @@ const EditServerPage = () => {
           
           {/* Description Block */}
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Description</label>
+            <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+              Description <span className="text-orange-500">*</span>
+            </label>
             <textarea
               required
+              maxLength={2000}
               rows={3}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#ff5500] transition-colors resize-none h-24"
-              placeholder="What makes your community unique?"
+              onBlur={() => setIsDescTouched(true)} // 👑 Triggers when cursor leaves the box
+              className={`w-full bg-[#1a1a1a] border rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none transition-colors resize-none h-24 ${
+                isDescTouched && formData.description.trim().length < 200 
+                  ? 'border-red-500/80 focus:border-red-500 shadow-[0_0_8px_rgba(239,68,68,0.2)]' 
+                  : 'border-white/10 focus:border-[#ff5500]'
+              }`}
+              placeholder="What makes your community unique? (Min. 200 characters)"
             />
+
+            {/* Dynamic Footer: Error Message & Counter */}
+            <div className="flex justify-between items-center mt-1.5 px-1">
+              <span className="text-[11px] font-bold">
+                {isDescTouched && formData.description.trim().length < 200 ? (
+                  <span className="text-red-500 animate-pulse">
+                    ⚠️ Minimum 200 characters required ({formData.description.trim().length}/200)
+                  </span>
+                ) : formData.description.trim().length >= 200 ? (
+                  <span className="text-emerald-500">✅ Length accepted</span>
+                ) : (
+                  <span className="text-gray-500"></span>
+                )}
+              </span>
+              <span className="text-[10px] text-gray-500 font-medium">
+                {formData.description.length} / 2000
+              </span>
+            </div>
           </div>
 
           {/* Tags & Primary Language */}
@@ -198,9 +264,9 @@ const EditServerPage = () => {
         </div>
 
         {/* 👑 RIGHT PANEL: Bot Routing (Brought button scale back up) */}
-        <div className="md:col-span-5 bg-[#111] border border-white/5 p-6 rounded-xl flex flex-col justify-between shadow-xl min-h-full">
+        <div className="md:col-span-5 bg-[#111] border border-white/5 p-6 rounded-xl flex flex-col shadow-xl h-fit">
           
-          <div className="space-y-4">
+          <div className="space-y-4 pb-0 md:pb-6">
             <h3 className="text-base font-bold text-gray-200 border-b border-white/5 pb-2.5">Bot Configuration</h3>
             
             {/* Welcome Target Box */}
@@ -245,11 +311,24 @@ const EditServerPage = () => {
           {/* Submission Button - Back to Full Strength */}
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || formData.description.trim().length < 200}
             className="w-full bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6 md:mt-auto text-sm uppercase tracking-wider cursor-pointer"
           >
             {isSaving ? "Saving Configuration..." : "Save Changes"}
           </button>
+
+          {/* 👑 DANGER ZONE: The Kill Switch */}
+          <div className="mt-5 pt-5 border-t border-red-500/20">
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isSaving || isDeleting } // 👑 Added length lock
+              className="w-full flex items-center justify-center gap-2 text-xs font-bold text-red-500/80 hover:text-red-500 transition-colors uppercase tracking-wider cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 size={14} />
+              {isDeleting ? "Wiping Data..." : "Remove Server"}
+            </button>
+          </div>
 
         </div>
 

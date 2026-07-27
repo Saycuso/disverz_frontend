@@ -3,7 +3,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Flame, Activity, Hash, LayoutGrid } from "lucide-react";
 import Image from "next/image";
 
-// 👑 Upgraded the interface to anticipate both new tags and old category data, plus iconUrls
+// 👑 Upgraded the interface to anticipate both new tags and old category data, plus iconUrls and inviteUrls
 interface ServerType {
   id: string;
   name: string;
@@ -13,6 +13,7 @@ interface ServerType {
   memberCount: number;
   lastChallengeAt: string | null;
   iconUrl?: string | null;
+  inviteLink?: string | null;
 }
 
 // Force Next.js to always fetch fresh data, never cache the live feed
@@ -30,10 +31,12 @@ export default async function Home() {
   const { data: servers } = await getActiveServers();
 
   return (
-    <main className="min-h-screen bg-[#060606] text-white p-6 md:p-12 selection:bg-orange-500/30">
+    <main className="min-h-screen text-white px-0 md:px-0 selection:bg-orange-500/30 relative">
+       {/* 👑 THE AMBIENT GLOW BACKDROP */}
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[700px] h-[350px] bg-linear-to-r from-orange-500/10 via-red-500/5 to-indigo-500/10 rounded-full blur-[130px] pointer-events-none select-none -z-10" />
       
       {/* Header section */}
-      <div className="max-w-5xl mx-auto mb-16 text-center">
+      <div className="max-w-7xl mx-auto mb-16 text-center relative">
         <div className="inline-flex items-center justify-center p-3 mb-4 rounded-full bg-orange-500/10 border border-orange-500/20">
           <Flame size={32} className="text-orange-500 animate-pulse" />
         </div>
@@ -42,20 +45,20 @@ export default async function Home() {
             Disverz
           </span>
         </h1>
-        <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+        <p className="text-gray-400 text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed">
           The only server list where rank is determined by real human activity. 
           <br className="hidden md:block"/> No dead communities. No bot spam.
         </p>
       </div>
 
       {/* The Pulse Feed */}
-      <div className="max-w-5xl mx-auto w-full">
+      <div className="max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
           <div className="flex items-center gap-3 text-white font-bold tracking-widest uppercase text-sm">
             <Activity size={18} className="text-orange-500" />
             <h2>Live Pulse Feed</h2>
           </div>
-          <span className="text-xs text-gray-500 font-medium">
+          <span className="text-xs text-gray-500 font-bold tracking-widest uppercase">
             {servers.length} Active {servers.length === 1 ? 'Server' : 'Servers'}
           </span>
         </div>
@@ -66,71 +69,70 @@ export default async function Home() {
             <p className="text-gray-400 font-medium">The feed is currently silent. No servers are active.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {servers.map((server: ServerType) => (
-              <Link href={`/servers/${server.id}`} key={server.id} className="block w-full h-full outline-none">
-                {/* 👑 Enhanced Vertical Card Layout */}
-                <div className="flex flex-col h-full bg-[#0e0e0e] border border-white/5 p-6 rounded-2xl relative overflow-hidden group hover:border-orange-500/20 transition-all duration-300 shadow-xl hover:shadow-orange-500/5 hover:-translate-y-1">
-                  
-                  {/* Top Gradient Accent Line */}
-                  <div className="absolute top-0 left-0 w-full h-0.5 bg-linear-to-r from-orange-500 to-indigo-500 opacity-30 group-hover:opacity-100 transition-opacity" />
-
-                  {/* Header Block: Identity and Metrics Meta */}
-                  <div className="flex items-start gap-4 mb-4">
+              <div key={server.id} className="relative group/card h-full">
+                {/* Main Clickable Card Link */}
+                <Link href={`/servers/${server.id}`} className="block w-full h-full outline-none">
+                  <div className="flex flex-col h-full bg-[#0e0e0e] border border-white/5 p-6 rounded-2xl overflow-hidden relative shadow-xl hover:border-orange-500/20 hover:shadow-orange-500/5 hover:-translate-y-1 transition-all duration-300">
                     
-                    {/* Server Avatar Box */}
-                    <div className="shrink-0 w-14 h-14 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-xl font-black text-gray-400 shadow-inner group-hover:scale-105 transition-transform duration-300 uppercase overflow-hidden relative">
-                      {server.iconUrl ? (
-                        <Image src={server.iconUrl} alt={server.name} fill className="object-cover" />
-                      ) : (
-                        server.name.charAt(0)
-                      )}
-                    </div>
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-linear-to-r from-orange-500 to-indigo-500 opacity-30 group-hover/card:opacity-100 transition-opacity" />
 
-                    {/* Title & Status Pills Stack */}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors tracking-tight truncate mb-1.5">
-                        {server.name}
-                      </h3>
-                      
-                      <div className="flex flex-wrap items-center gap-2">
-                        {/* Member Count Badge */}
-                        <span className="bg-white/5 border border-white/5 text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1.5 select-none shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_#818cf8]" />
-                          {server.memberCount?.toLocaleString() || 0}
-                        </span>
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="shrink-0 w-16 h-16 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-xl font-black text-gray-400 shadow-inner group-hover/card:scale-105 transition-transform duration-300 uppercase overflow-hidden relative">
+                        {server.iconUrl ? (
+                          <Image src={server.iconUrl} alt={server.name} fill className="object-cover" />
+                        ) : (
+                          server.name.charAt(0)
+                        )}
+                      </div>
 
-                        {/* Last Active Timestamp Badge */}
-                        <div className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${
-                          server.lastChallengeAt 
-                            ? 'bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_12px_rgba(249,115,22,0.1)]' 
-                            : 'bg-neutral-800 text-gray-400 border-white/5'
-                        }`}>
-                          <Activity size={10} className={server.lastChallengeAt ? "animate-pulse" : ""} />
-                          {server.lastChallengeAt 
-                            ? formatDistanceToNow(new Date(server.lastChallengeAt), { addSuffix: true }) 
-                            : "Never Active"}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-2xl font-bold text-white group-hover/card:text-orange-400 transition-colors tracking-tight line-clamp-2 mb-2">
+                          {server.name}
+                        </h3>
+                        
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <span className="bg-white/5 border border-white/10 text-gray-200 text-xs font-extrabold px-3 py-1 rounded-lg flex items-center gap-2 select-none shrink-0 tracking-wide">
+                            <span className="w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_10px_#818cf8]" />
+                            {server.memberCount?.toLocaleString() || 0} Members
+                          </span>
+
+                          <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold border tracking-wide ${
+                            server.lastChallengeAt 
+                              ? 'bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_12px_rgba(249,115,22,0.15)]' 
+                              : 'bg-white/2 text-gray-500 border-white/4'
+                          }`}>
+                            <Activity size={12} className={server.lastChallengeAt ? "animate-pulse" : "opacity-30"} />
+                            {server.lastChallengeAt 
+                              ? formatDistanceToNow(new Date(server.lastChallengeAt), { addSuffix: true }) 
+                              : "Never Active"}
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    <p className="text-sm text-gray-400 leading-relaxed mb-16 line-clamp-3">
+                      {server.description || "No description provided for this server."}
+                    </p>
+
                   </div>
+                </Link>
 
-                  {/* Clean Content Area */}
-                  <p className="text-sm text-gray-400 leading-relaxed mb-6 line-clamp-3">
-                    {server.description || "No description provided for this server."}
-                  </p>
-
-                  {/* Tag Array Footer - Locked uniformly to the card base */}
-                  <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-3 border-t border-white/5">
+                {/* 👑 ACTION FOOTER: Positioned perfectly inside the absolute layer to balance tags and the Join button */}
+                <div className="absolute bottom-0 left-0 w-full p-6 flex items-center justify-between gap-4 pointer-events-none">
+                  
+                  {/* Tags Left Aligned */}
+                  <div className="flex flex-wrap items-center gap-1.5 pointer-events-auto">
                     {server.tags && server.tags.length > 0 ? (
                       server.tags.slice(0, 3).map((tag, idx) => (
-                        <span key={idx} className="flex items-center gap-1 bg-white/5 text-gray-400 border border-white/5 hover:border-white/10 hover:text-white transition-colors text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-wider select-none">
+                        <span key={idx} className="flex items-center gap-1 bg-white/5 text-gray-400 border border-white/5 hover:border-white/10 hover:text-white transition-colors text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider select-none">
                           <Hash size={10} className="text-orange-500/50" />
                           {tag}
                         </span>
                       ))
                     ) : server.category ? (
-                      <span className="flex items-center gap-1 bg-white/5 text-gray-400 border border-white/5 hover:border-white/10 hover:text-white transition-colors text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-wider select-none">
+                      <span className="flex items-center gap-1 bg-white/5 text-gray-400 border border-white/5 hover:border-white/10 hover:text-white transition-colors text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider select-none">
                         <LayoutGrid size={10} className="text-orange-500/50" />
                         {server.category}
                       </span>
@@ -139,8 +141,18 @@ export default async function Home() {
                     )}
                   </div>
 
+                  {/* 🚀 Independent Join Server Trigger Box */}
+                  <a
+                    href={server.inviteLink || "https://discord.gg"} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pointer-events-auto px-4 py-1.5 bg-[#ff5500] hover:bg-[#ff7733] text-white text-xs font-black rounded-lg transition-all transform active:scale-95 group-hover/card:shadow-[0_0_15px_rgba(255,85,0,0.3)] tracking-wider uppercase cursor-pointer"
+                  >
+                    Join
+                  </a>
+
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

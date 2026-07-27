@@ -20,6 +20,7 @@ export default function SetupServer() {
   const [description, setDescription] = useState("");
   const [language, setLanguage] = useState("English");
   const [tags, setTags] = useState<string[]>([]);
+  const [isDescTouched, setIsDescTouched] = useState(false); // 👑 ADD THIS
 
 // The Identity State
   const [serverName, setServerName] = useState("Loading...");
@@ -74,16 +75,7 @@ export default function SetupServer() {
     const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID; 
     const rawUrl = `${window.location.origin}/dashboard/verify`;
     const redirectUri = encodeURIComponent(rawUrl);
-    
-    // 🚨 THE VISUAL DEBUGGER ALERT 🚨
-  alert(
-    `--- OAUTH DEBUGGER ---\n` +
-    `Client ID: ${clientId}\n` +
-    `Raw Redirect URL: ${rawUrl}\n` +
-    `Encoded Redirect: ${redirectUri}\n` +
-    `-----------------------\n` +
-    `Make sure the 'Raw Redirect URL' matches your Discord Portal EXACTLY!`
-  );
+  
   
     // 👑 This URL forces the user to invite the bot to the specific server they chose
     const discordBotAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=8&scope=bot%20applications.commands&guild_id=${serverId}&disable_guild_select=true&redirect_uri=${redirectUri}&response_type=code`;
@@ -94,8 +86,8 @@ export default function SetupServer() {
 
 return (
   // 👑 FIXED: Changed justify-center to justify-start to snap elements right up below your text headers
-  <main className="min-h-screen bg-[#0a0a0a] text-white py-4 px-6 flex flex-col justify-start">
-    <div className="max-w-6xl w-full mx-auto">
+  <main className="min-h-screen bg-[#0a0a0a] text-white py-4 px-0 flex flex-col justify-start">
+    <div className="max-w-7xl w-full mx-auto">
       
       {/* Back Button Layout */}
       <button 
@@ -131,14 +123,34 @@ return (
               </label>
               <textarea
                 required
-                maxLength={300}
+                maxLength={2000}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="What makes your community unique?"
-                className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500 transition-all resize-none h-20 focus:ring-1 focus:ring-orange-500/20"
+                onBlur={() => setIsDescTouched(true)} // 👑 The trigger
+                placeholder="What makes your community unique? (Min. 200 characters)"
+                className={`w-full bg-black border rounded-lg px-3 py-2 text-sm text-white focus:outline-none transition-all resize-none h-20 focus:ring-1 ${
+                  isDescTouched && description.trim().length < 200
+                    ? 'border-red-500/80 focus:border-red-500 focus:ring-red-500/20 shadow-[0_0_8px_rgba(239,68,68,0.2)]' 
+                    : 'border-white/10 focus:border-orange-500 focus:ring-orange-500/20'
+                }`}
               />
-              <div className="text-right text-[10px] text-gray-500 mt-0.5">
-                {description.length} / 300 characters
+              
+              {/* Dynamic Footer: Error Message & Counter */}
+              <div className="flex justify-between items-center mt-1 px-1">
+                <span className="text-[10px] font-bold">
+                  {isDescTouched && description.trim().length < 200 ? (
+                    <span className="text-red-500 animate-pulse">
+                      ⚠️ Minimum 200 chars ({description.trim().length}/200)
+                    </span>
+                  ) : description.trim().length >= 200 ? (
+                    <span className="text-emerald-500">✅ Length accepted</span>
+                  ) : (
+                    <span></span>
+                  )}
+                </span>
+                <span className="text-[10px] text-gray-500 font-medium">
+                  {description.length} / 2000 characters
+                </span>
               </div>
             </div>
 
@@ -172,7 +184,10 @@ return (
             {/* Discord Gateway Submission Action */}
             <button
               type="submit"
-              className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20"
+              disabled={description.trim().length < 200}
+              className="w-full font-bold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider
+                bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-lg shadow-indigo-500/20 
+               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/5"
             >
               <Bot size={16} />
               Save & Invite Disverz Bot

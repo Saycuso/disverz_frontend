@@ -107,7 +107,7 @@ export default function ServerProfile() {
   return (
     // 👑 FIXED: Standardized responsive padding and page container blocks
     <main className="min-h-screen bg-[#060606] text-white px-4 py-8 md:py-12 flex flex-col items-center selection:bg-orange-500/30">
-      <div className="max-w-5xl w-full">
+      <div className="max-w-7xl w-full">
         {/* Dynamic Navigation Breadcrumb Row */}
         <button
           onClick={() => router.back()}
