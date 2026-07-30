@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PlusCircle, ShieldAlert, RefreshCw, Lock } from "lucide-react";
+import { PlusCircle, ShieldAlert, RefreshCw, Lock, Flame } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation"; // 👑 NEW: The Navigator
+import { useRouter } from "next/navigation";
+import { BumpModal } from "@/components/BumpModal";
 import Image from "next/image";
 
-// Define the shape of the data Discord sends us
 interface DiscordGuild {
   id: string;
   name: string;
@@ -18,30 +18,32 @@ interface ManagedServer {
   name: string;
   iconUrl: string | null;
   lastHumanMsgAt: string | null;
+  lastChallengeAt: string | null;
 }
 
 export default function Dashboard() {
-  const { user, isLoading: isAuthLoading } = useAuth(); // 👑 Wielding the Auth Context
-  const router = useRouter(); // 👑 Wielding the router
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
 
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [selectedServerId, setSelectedServerId] = useState("");
   const [isGuildsLoading, setIsGuildsLoading] = useState(true);
 
-  // 1. Add this state near your other useState declarations
+  const [bumpingServerId, setBumpingServerId] = useState<string | null>(null);
+
   const [myServers, setMyServers] = useState<ManagedServer[]>([]);
   const [isLoadingServers, setIsLoadingServers] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
   const totalPages = Math.ceil(myServers.length / itemsPerPage);
 
   const availableGuilds = guilds.filter(
     (guild) => !myServers.some((server) => server.discordId === guild.id),
   );
 
-  // Fetch the user's servers only after we confirm they are logged in
   useEffect(() => {
     const fetchAdminGuilds = async () => {
       try {
@@ -49,7 +51,7 @@ export default function Dashboard() {
           `${process.env.NEXT_PUBLIC_API_URL}/auth/guilds`,
           {
             method: "GET",
-            credentials: "include", // Sends the auth cookie
+            credentials: "include",
           },
         );
 
@@ -57,12 +59,8 @@ export default function Dashboard() {
           const data = await res.json();
           setGuilds(data);
           if (data.length > 0) {
-            setSelectedServerId(data[0].id); // Auto-select the first server
+            setSelectedServerId(data[0].id);
           }
-        } else {
-          console.warn(
-            "Silent Notice: Awaiting complete authentication session synchronization.",
-          );
         }
       } catch (error) {
         console.warn(
@@ -83,31 +81,37 @@ export default function Dashboard() {
     }
   }, [user, isAuthLoading]);
 
-  // 2. Add this useEffect to fetch the armory data
   useEffect(() => {
-    const fetchMyServers = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/servers/me`,
-          {
-            credentials: "include",
-          },
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setMyServers(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch my servers", error);
-      } finally {
-        setIsLoadingServers(false);
-      }
-    };
-
-    fetchMyServers();
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
 
-  // 👑 Auto-Correction: If the selected server is no longer available, select the next valid one
+  const fetchMyServers = async () => {
+    setIsLoadingServers(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servers/me`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMyServers(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch my servers", error);
+    } finally {
+      setIsLoadingServers(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchMyServers();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const currentAvailableIds = guilds
       .filter(
@@ -128,17 +132,14 @@ export default function Dashboard() {
         }, 0);
       }
     }
-  }, [guilds, myServers, selectedServerId]); // Deliberately omit selectedServerId to prevent render loops
+  }, [guilds, myServers, selectedServerId]);
 
   const handleProceed = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedServerId) return;
-
-    // Route to the new details page we are about to build
     router.push(`/dashboard/setup/${selectedServerId}`);
   };
 
-  // 🛡️ Security Shield: Block unauthenticated access
   if (!isAuthLoading && !user) {
     return (
       <main className="min-h-screen bg-[#0a0a0a] text-white p-8 flex flex-col items-center justify-center">
@@ -154,53 +155,51 @@ export default function Dashboard() {
   const isLoading = isAuthLoading || isGuildsLoading;
 
   return (
-    <main className="w-full flex-1 px-4 md:px-0 py-8">
+    <main className="w-full flex-1 px-0 md:px-0 py-8 relative">
       <div className="max-w-7xl mx-auto w-full">
-        {/* 👑 FIXED OPTION 2: High-End Split Header Layout */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 border-b border-white/5 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-8 border-b border-white/5 pb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight mb-1">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight mb-1">
               {user ? `${user.username}'s Command Center` : "Command Center"}
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-xs md:text-sm text-gray-400">
               Register your Discord server to enter the Disverz Pulse Feed.
             </p>
           </div>
 
-          {/* Visual Balance Right Anchor Widget */}
-          <div className="mt-4 md:mt-0 bg-[#111] border border-white/5 px-4 py-2 rounded-lg text-xs text-gray-400 font-semibold flex items-center gap-2 select-none">
+          <div className="mt-4 md:mt-0 bg-[#111] border border-white/5 px-4 py-2 rounded-lg text-[11px] md:text-xs text-gray-400 font-semibold flex items-center gap-2 select-none w-fit">
             <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
             Total Linked Guilds:{" "}
             <span className="text-white font-bold">{myServers.length}</span>
           </div>
         </div>
 
-        {/* 🚀 THE TACTICAL GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT FLANK: Add Server */}
-          <div className="lg:col-span-5 bg-[#111] border border-white/5 p-6 rounded-xl shadow-xl sticky top-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+          <div className="lg:col-span-5 bg-[#111] border border-white/5 p-3 md:p-6 rounded-xl shadow-xl lg:sticky lg:top-24'">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
-                <PlusCircle className="text-orange-500" size={24} />
-                <h2 className="text-xl font-bold">Add Your Server</h2>
+                <PlusCircle className="text-orange-500" size={20} />
+                <h2 className="text-md md:text-xl font-bold">
+                  Add Your Server
+                </h2>
               </div>
               {isLoading && (
-                <RefreshCw className="text-gray-500 animate-spin" size={18} />
+                <RefreshCw className="text-gray-500 animate-spin" size={16} />
               )}
             </div>
 
             <form onSubmit={handleProceed} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
+                <label className="block text-[10px] md:text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
                   Select Your Server
                 </label>
 
                 {isLoading ? (
-                  <div className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 animate-pulse text-sm">
-                    Scanning your Discord permissions...
+                  <div className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 animate-pulse text-xs md:text-sm">
+                    Scanning permissions...
                   </div>
                 ) : guilds.length === 0 ? (
-                  <div className="w-full bg-[#1a1a1a] border border-red-500/20 rounded-lg px-4 py-2.5 text-red-400 text-sm">
+                  <div className="w-full bg-[#1a1a1a] border border-red-500/20 rounded-lg px-4 py-2.5 text-red-400 text-xs md:text-sm">
                     {
                       "We couldn't find any servers where you have Administrator permissions."
                     }
@@ -209,7 +208,7 @@ export default function Dashboard() {
                   <select
                     value={selectedServerId}
                     onChange={(e) => setSelectedServerId(e.target.value)}
-                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition-all appearance-none cursor-pointer"
+                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-orange-500 transition-all appearance-none cursor-pointer"
                   >
                     {availableGuilds.map((guild) => (
                       <option
@@ -223,8 +222,11 @@ export default function Dashboard() {
                   </select>
                 )}
 
-                <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1.5">
-                  <ShieldAlert size={14} className="text-orange-500/70" />
+                <p className="text-[10px] md:text-[11px] text-gray-500 mt-2 flex items-center gap-1.5">
+                  <ShieldAlert
+                    size={12}
+                    className="text-orange-500/70 shrink-0"
+                  />
                   Only servers with Admin or Manage Guild permissions are shown.
                 </p>
               </div>
@@ -232,118 +234,190 @@ export default function Dashboard() {
               <button
                 type="submit"
                 disabled={isLoading || guilds.length === 0}
-                className="w-full bg-[#ff5500] hover:bg-[#ff7733] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-lg transition-colors text-sm"
+                className="w-full bg-[#ff5500] hover:bg-[#ff7733] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-lg transition-colors text-xs md:text-sm"
               >
                 List Server on Disverz
               </button>
             </form>
           </div>
 
-          {/* RIGHT FLANK: The Armory */}
           <div className="lg:col-span-7">
-            <div className="bg-[#111] border border-white/5 p-6 rounded-xl shadow-xl w-full flex flex-col min-h-105">
-              <h2 className="text-lg font-bold mb-5 flex items-center gap-2 text-gray-200 border-b border-white/5 pb-3">
+            <div className="bg-[#111] border border-white/5 p-1 md:p-6 rounded-xl shadow-xl w-full flex flex-col min-h-75 md:min-h-105">
+              <h2 className="text-md md:text-lg font-bold mb-5 flex items-center gap-2 text-gray-200 border-b border-white/5 pb-3">
                 <span>🛡️</span> My Managed Servers ({myServers.length})
               </h2>
 
               {isLoadingServers ? (
-                <div className="text-sm text-gray-400 animate-pulse py-4">
+                <div className="text-xs md:text-sm text-gray-400 animate-pulse py-4">
                   Loading your armory...
                 </div>
               ) : myServers.length === 0 ? (
-                <div className="border border-dashed border-white/10 p-10 rounded-xl text-center flex flex-col items-center justify-center h-60">
-                  <ShieldAlert className="text-gray-600 mb-3" size={32} />
-                  <h3 className="text-gray-300 font-bold mb-1">
+                <div className="border border-dashed border-white/10 p-6 md:p-10 rounded-xl text-center flex flex-col items-center justify-center h-48 md:h-60">
+                  <ShieldAlert className="text-gray-600 mb-3" size={28} />
+                  <h3 className="text-gray-300 font-bold mb-1 text-sm md:text-base">
                     No Servers Listed Yet
                   </h3>
-                  <p className="text-sm text-gray-500 max-w-sm">
+                  <p className="text-xs md:text-sm text-gray-500 max-w-sm">
                     Select a server from the left panel and click{" "}
                     {"List Server on Disverz"} to begin dominating the ranks.
                   </p>
                 </div>
               ) : (
                 <>
-                  {/* The Grid Container */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-                    {myServers.map((server) => (
-                      <div
-                        key={server.id}
-                        className="bg-[#1a1a1a] border border-white/5 p-4 rounded-xl flex flex-col justify-between hover:border-orange-500/30 transition-all group"
-                      >
-                        <div className="flex items-start gap-3 mb-4">
-                          {server.iconUrl ? (
-                            <Image
-                              src={server.iconUrl}
-                              alt={server.name}
-                              width={44}
-                              height={44}
-                              className="w-11 h-11 rounded-lg object-cover ring-1 ring-white/10"
-                            />
-                          ) : (
-                            <div className="w-11 h-11 rounded-lg bg-neutral-800 flex items-center justify-center font-bold text-gray-400 text-base shrink-0">
-                              {server.name.charAt(0)}
-                            </div>
-                          )}
-                          <div className="-hidden">
-                            <h3 className="font-bold text-sm leading-tight text-white group-hover:text-orange-500 transition-colors truncate">
-                              {server.name}
-                            </h3>
-                            <p className="text-[11px] text-gray-500 mt-1 flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              {server.lastHumanMsgAt
-                                ? new Date(
-                                    server.lastHumanMsgAt,
-                                  ).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
-                                : "Active"}
-                            </p>
-                          </div>
-                        </div>
+                    {myServers
+                      .slice(
+                        (currentPage - 1) * itemsPerPage,
+                        currentPage * itemsPerPage,
+                      )
+                      .map((server) => {
+                        const COOLDOWN_HOURS = 2;
+                        let isOnCooldown = false;
+                        let timeLeftText = "";
 
-                        <button
-                          onClick={() =>
-                            router.push(`/dashboard/edit/${server.id}`)
+                        if (server.lastChallengeAt) {
+                          const lastBump = new Date(
+                            server.lastChallengeAt,
+                          ).getTime();
+                          const hoursSinceLast =
+                            (currentTime - lastBump) / (1000 * 60 * 60);
+
+                          if (hoursSinceLast < COOLDOWN_HOURS) {
+                            isOnCooldown = true;
+                            let totalMinsLeft = Math.ceil(
+                              (COOLDOWN_HOURS - hoursSinceLast) * 60,
+                            );
+                            totalMinsLeft = Math.min(
+                              totalMinsLeft,
+                              COOLDOWN_HOURS * 60,
+                            );
+                            const hrs = Math.floor(totalMinsLeft / 60);
+                            const mins = totalMinsLeft % 60;
+                            timeLeftText =
+                              hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
                           }
-                          className="w-full bg-transparent hover:bg-orange-500 text-gray-300 hover:text-white border border-white/10 hover:border-orange-500 px-3 py-2 rounded-lg text-xs font-semibold transition-all mt-auto"
-                        >
-                          Edit Configuration →
-                        </button>
-                      </div>
-                    ))}
+                        }
+
+                        return (
+                          <div
+                            key={server.id}
+                            className="bg-[#1a1a1a] border border-white/5 p-2 md:p-4 rounded-xl flex flex-col justify-between hover:border-orange-500/30 transition-all group"
+                          >
+                            <div className="flex items-start gap-3 mb-4">
+                              {server.iconUrl ? (
+                                <Image
+                                  src={server.iconUrl}
+                                  alt={server.name}
+                                  width={44}
+                                  height={44}
+                                  // 👑 Slightly smaller icon on mobile
+                                  className="w-10 h-10 md:w-11 md:h-11 rounded-lg object-cover ring-1 ring-white/10 shrink-0"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 md:w-11 md:h-11 rounded-lg bg-neutral-800 flex items-center justify-center font-bold text-gray-400 text-base shrink-0">
+                                  {server.name.charAt(0)}
+                                </div>
+                              )}
+
+                              {/* 👑 THE FIX: min-w-0 flex-1 guarantees truncation works and doesn't break the flexbox */}
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-bold text-sm md:text-base leading-tight text-white group-hover:text-orange-500 transition-colors truncate">
+                                  {server.name}
+                                </h3>
+                                <p className="text-[10px] md:text-[11px] text-gray-500 mt-1 flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                                  <span className="truncate">
+                                    {server.lastHumanMsgAt
+                                      ? new Date(
+                                          server.lastHumanMsgAt,
+                                        ).toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })
+                                      : "Active"}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* 👑 BUTTON FIX: Shrunk vertical padding, text sizes, and border-radius for mobile */}
+                            <div className="flex items-center gap-1.5 md:gap-2 mt-auto pt-2">
+                              
+                              {/* 1. BUMP BUTTON */}
+                              <button
+                                onClick={() => setBumpingServerId(server.id)}
+                                disabled={isOnCooldown}
+                                className={`flex-[1.2] px-1.5 md:px-3 py-1.5 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-xs font-bold transition-all flex items-center justify-center gap-1 
+              ${
+                isOnCooldown
+                  ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-white/5"
+                  : "bg-orange-500 hover:bg-orange-600 text-white shadow-[0_0_10px_rgba(255,85,0,0.15)] hover:shadow-[0_0_15px_rgba(255,85,0,0.3)]"
+              }`}
+                              >
+                                {isOnCooldown ? (
+                                  <>⏱️ {timeLeftText}</>
+                                ) : (
+                                  <>
+                                    <Flame
+                                      size={12}
+                                      className="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0"
+                                    />
+                                    Bump
+                                  </>
+                                )}
+                              </button>
+                              
+                              {/* 2. EDIT BUTTON */}
+                              <button
+                                onClick={() =>
+                                  router.push(`/dashboard/edit/${server.id}`)
+                                }
+                                className="flex-1 bg-transparent hover:bg-white/10 text-gray-300 border border-white/10 px-1.5 md:px-3 py-1.5 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-xs font-semibold transition-all flex items-center justify-center gap-1"
+                              >
+                                Edit ⚙️
+                              </button>
+
+                              {/* 3. VIEW PAGE BUTTON (Mobile Exclusive) */}
+                              <button
+                                onClick={() => router.push(`/servers/${server.id}`)}
+                                className=" flex-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-1.5 md:px-3 py-1.5 md:py-2 rounded-md text-[10px] font-semibold transition-all flex items-center justify-center gap-1"
+                              >
+                                View 👁️
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
 
-                  {/* 👑 ADDED HERE: Sleek Under-Grid Pagination */}
-                  <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-6">
-                    <span className="text-xs text-zinc-500">
-                       Showing{" "} 
+                  <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-5 md:mt-6">
+                    {/* 👑 Hides "Showing" on mobile to save space */}
+                    <span className="text-[10px] md:text-xs text-zinc-500">
+                      <span className="hidden sm:inline">Showing </span>
                       <span className="text-zinc-300 font-medium">
                         {myServers.length === 0
                           ? 0
                           : (currentPage - 1) * itemsPerPage + 1}
                         -
                         {Math.min(currentPage * itemsPerPage, myServers.length)}
-                      </span>
-                      {" "}of{" "}
+                      </span>{" "}
+                      of{" "}
                       <span className="text-zinc-300 font-medium">
                         {myServers.length}
                       </span>
                     </span>
 
-                    <div className="flex items-center gap-2">
-                      {/* Previous Button: Disabled on Page 1 */}
+                    <div className="flex items-center gap-1.5 md:gap-2">
                       <button
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(prev - 1, 1))
                         }
                         disabled={currentPage === 1}
-                        className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-35 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 disabled:cursor-not-allowed"
+                        className="px-2 py-1.5 md:px-3 md:py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-lg text-[10px] md:text-xs font-medium transition-colors cursor-pointer disabled:opacity-35 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 disabled:cursor-not-allowed"
                       >
-                        ← Previous
+                        ← Prev
                       </button>
 
-                      {/* Next Button: Disabled on Last Page */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
@@ -351,7 +425,7 @@ export default function Dashboard() {
                           )
                         }
                         disabled={currentPage === totalPages || totalPages <= 1}
-                        className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-35 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 disabled:cursor-not-allowed"
+                        className="px-2 py-1.5 md:px-3 md:py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-lg text-[10px] md:text-xs font-medium transition-colors cursor-pointer disabled:opacity-35 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 disabled:cursor-not-allowed"
                       >
                         Next →
                       </button>
@@ -363,6 +437,13 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <BumpModal
+        isOpen={!!bumpingServerId}
+        serverId={bumpingServerId || ""}
+        onClose={() => setBumpingServerId(null)}
+        onSuccess={() => fetchMyServers()}
+      />
     </main>
   );
 }

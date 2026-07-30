@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} bg-[#060606] text-white min-h-screen relative overflow-x-hidden`}
+        className={`${inter.className} bg-[#060606] text-white min-h-screen relative `}
       >
         {/* The Navbar will now sit at the top of every page */}
         <AuthProvider>

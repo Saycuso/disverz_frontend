@@ -19,6 +19,7 @@ export default function SetupServer() {
   // The Ammunition
   const [description, setDescription] = useState("");
   const [language, setLanguage] = useState("English");
+  const [category, setCategory] = useState("gaming");
   const [tags, setTags] = useState<string[]>([]);
   const [isDescTouched, setIsDescTouched] = useState(false); // 👑 ADD THIS
 
@@ -68,6 +69,7 @@ export default function SetupServer() {
     sessionStorage.setItem(`disverz_setup_${serverId}`, JSON.stringify({
       description,
       tags,
+      category,
       language
     }));
 
@@ -154,8 +156,7 @@ return (
               </div>
             </div>
 
-            {/* Tags & Language Placement Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
               <div>
                 <label className="block text-[11px] font-bold text-gray-300 mb-1.5 uppercase tracking-wider">
                   Tags (Max 5)
@@ -163,6 +164,33 @@ return (
                 <TagInput tags={tags} setTags={setTags} maxTags={5} />
               </div>
               
+              {/* Tags & Language Placement Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Trivia Category Dropdown - Mapped STRICTLY to questionBank.json */}
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-300 mb-1.5 uppercase tracking-wider">
+                    Trivia Category <span className="text-orange-500">*</span>
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full h-9.5 bg-black border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-orange-500 transition-all cursor-pointer focus:ring-1 focus:ring-orange-500/20"
+                  >
+                    <option value="anime">Anime</option>
+                    <option value="art">Art & Design</option>
+                    <option value="books">Books & Literature</option>
+                    <option value="chill">Chill / Vibe</option>
+                    <option value="coding">Coding & Dev</option>
+                    <option value="education">Education & Science</option>
+                    <option value="finance">Finance & Crypto</option>
+                    <option value="gaming">Gaming</option>
+                    <option value="meme">Memes & Internet</option>
+                    <option value="movies">Movies & TV</option>
+                    <option value="social">Social & Discord</option>
+                    <option value="sports">Sports</option>
+                    <option value="technology">Technology</option>
+                  </select>
+                </div>
               <div>
                 <label className="block text-[11px] font-bold text-gray-300 mb-1.5 uppercase tracking-wider">
                   Main Language <span className="text-orange-500">*</span>
