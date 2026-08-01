@@ -51,7 +51,7 @@ function VerifySetupContent() {
         }
 
         // 2. 👑 NEW: Fetch User's Guilds to extract the Name and Icon
-        const guildsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/guilds`, {
+        const guildsRes = await fetch(`${baseUrl}/api/auth/guilds`, {
           credentials: "include"
         });
 
