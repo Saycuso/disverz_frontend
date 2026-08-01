@@ -108,7 +108,7 @@ return (
           /* Discord Login Button */
           <a 
             
-            href={`${baseUrl}/api/`}
+            href={`${baseUrl}/api/auth/discord/login`}
             className="flex items-center gap-2 bg-[#5865F2] hover:bg-[#4752C4] text-white px-3 py-2 md:px-4 md:py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-[#5865F2]/10 active:scale-95 cursor-pointer"
           >
             <LogIn size={14} />
