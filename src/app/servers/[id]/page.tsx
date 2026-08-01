@@ -43,8 +43,9 @@ export default function ServerProfile() {
   useEffect(() => {
     const fetchServerDetails = async () => {
       try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/servers/${serverId}`,
+          `${baseUrl}/api/servers/${serverId}`,
         );
         if (res.ok) {
           const data = await res.json();

@@ -37,7 +37,8 @@ function VerifySetupContent() {
 
     const fetchChannels = async () => {
       try {
-        const channelsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servers/${guildId}/channels`, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+        const channelsRes = await fetch(`${baseUrl}/api/servers/${guildId}/channels`, {
           credentials: "include"
         });
 

@@ -41,8 +41,9 @@ const EditServerPage = () => {
     const fetchServerAndChannels = async () => {
       try {
         // 1. Fetch current server details
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
         const serverRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/servers/${serverId}`,
+          `${baseUrl}/api/servers/${serverId}`,
         );
         if (!serverRes.ok) throw new Error("Failed to fetch server details");
         const serverData = await serverRes.json();
@@ -143,8 +144,9 @@ const EditServerPage = () => {
     setError(null);
 
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/servers/${serverId}`,
+        `${baseUrl}/api/servers/${serverId}`,
         {
           method: "DELETE",
           credentials: "include",

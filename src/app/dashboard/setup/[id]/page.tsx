@@ -31,7 +31,8 @@ export default function SetupServer() {
   useEffect(() => {
     const fetchGuildIdentity = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/guilds`, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${baseUrl}/api/auth/guilds`, {
           credentials: "include",
         });
         

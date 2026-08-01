@@ -26,7 +26,8 @@ export function BumpModal({ serverId, isOpen, onClose, onSuccess }: BumpModalPro
    // 👑 FIX 1: fetchChallenge now ONLY fetches data. No synchronous state drops at start.
   const fetchChallenge = useCallback(async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servers/${serverId}/web-challenge`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${baseUrl}/api/servers/${serverId}/web-challenge`, {
         credentials: "include"
       });
       
