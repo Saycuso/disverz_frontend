@@ -67,7 +67,8 @@ export function BumpModal({ serverId, isOpen, onClose, onSuccess }: BumpModalPro
     setError(null);
     
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servers/${serverId}/web-challenge`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${baseUrl}/api/servers/${serverId}/web-challenge`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

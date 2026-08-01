@@ -92,7 +92,8 @@ export default function Dashboard() {
   const fetchMyServers = async () => {
     setIsLoadingServers(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servers/me`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch( `${baseUrl}/api/servers/me`, {
         credentials: "include",
       });
       if (res.ok) {
