@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { TagInput } from "@/components/TagInput";
 import { Trash2 } from "lucide-react"; 
 
@@ -184,9 +185,9 @@ const EditServerPage = () => {
         <div className="mb-6">
           <Link
             href="/dashboard"
-            className="text-xs md:text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 mb-2 w-fit"
+            className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs text-gray-400 hover:text-white transition-colors mb-3 md:mb-4 group w-fit cursor-pointer p-1 -ml-1"
           >
-            ← Command Center
+            <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />Command Center
           </Link>
           <h1 className="text-xl md:text-3xl font-bold text-white tracking-tight mt-2 md:mt-3">
             Edit {formData.name}

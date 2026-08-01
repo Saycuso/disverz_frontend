@@ -162,13 +162,14 @@ export default async function Home() {
                                   new Date(server.lastChallengeAt),
                                   { addSuffix: false },
                                 )
+                                  .replace("less than a minute", "1m")
                                   .replace("about ", "")
                                   .replace(" hours", "h")
                                   .replace(" hour", "h")
                                   .replace(" h", "h")
                                   .replace(" minutes", "m")
                                   .replace(" minute", "m")
-                                  .replace(" m", "m")
+                                  .replace(" m", " m")
                                   .replace("less than a minute", "1m")
                               : "Never Active"}
                           </div>
