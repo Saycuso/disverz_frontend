@@ -130,7 +130,7 @@ export default function ServerProfile() {
               
               {/* Server Avatar Layout Profile frame */}
               <div className="relative group shrink-0 mx-auto sm:mx-0">
-                <div className="absolute inset-0 bg-gradient-to-tr from-orange-500 to-indigo-500 rounded-xl md:rounded-2xl blur-md opacity-20 group-hover:opacity-40 transition-all duration-500" />
+                <div className="absolute inset-0 bg-linear-to-trrom-orange-500 to-indigo-500 rounded-xl md:rounded-2xl blur-md opacity-20 group-hover:opacity-40 transition-all duration-500" />
                 {server.iconUrl ? (
                   <Image
                     src={server.iconUrl}
@@ -167,7 +167,7 @@ export default function ServerProfile() {
                 </div>
 
                 {/* 👑 THE FIX: Replaced custom class with break-words whitespace-pre-wrap to handle long links perfectly */}
-                <p className="text-gray-400 text-xs sm:text-sm md:text-base leading-relaxed mb-4 md:mb-5 max-w-xl break-words whitespace-pre-wrap">
+                <p className="text-gray-400 text-xs sm:text-sm md:text-base leading-relaxed mb-4 md:mb-5 max-w-xl wrap-break-word whitespace-pre-wrap">
                   {server.description || "No server description provided."}
                 </p>
 
@@ -190,7 +190,7 @@ export default function ServerProfile() {
           {/* 👑 RIGHT COLUMN: Floating Action Vitals Card Panel */}
           <div className="lg:col-span-4 bg-[#111] border border-white/5 p-4 md:p-5 rounded-xl md:rounded-2xl shadow-2xl relative overflow-hidden lg:sticky lg:top-24 w-full group">
             {/* Top colored accent indicator line decoration graphic */}
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-500 to-indigo-500" />
+            <div className="absolute top-0 left-0 w-full h-0.5 bg-linear-to-r from-orange-500 to-indigo-500" />
 
             <h3 className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 md:mb-4">
               Vitals & Connectivity

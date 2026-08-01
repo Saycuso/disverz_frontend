@@ -20,8 +20,9 @@ interface ServerType {
 export const dynamic = "force-dynamic";
 
 async function getActiveServers() {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/servers?sort=active`,
+    `${baseUrl}/api/servers?sort=active`,
     {
       cache: "no-store",
     },
