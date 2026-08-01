@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 
 export default function Navbar() {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
   const { user, isLoading } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false); // 👑 Track dropdown menu state
 return (
@@ -93,7 +94,7 @@ return (
                   </Link> */}
                   
                   <a 
-                    href={`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`} 
+                    href={`${baseUrl}/api/auth/logout`} 
                     className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors border-t border-white/5 mt-1 pt-1.5"
                   >
                     <LogOut size={14} />
@@ -106,7 +107,8 @@ return (
         ) : (
           /* Discord Login Button */
           <a 
-            href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/discord/login`}
+            
+            href={`${process.env.NEXT_PUBLIC_API_URL}/auth/discord/login`}
             className="flex items-center gap-2 bg-[#5865F2] hover:bg-[#4752C4] text-white px-3 py-2 md:px-4 md:py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-[#5865F2]/10 active:scale-95 cursor-pointer"
           >
             <LogIn size={14} />
