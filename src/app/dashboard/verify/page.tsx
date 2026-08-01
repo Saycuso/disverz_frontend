@@ -94,7 +94,8 @@ function VerifySetupContent() {
     };
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servers`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${baseUrl}/api/servers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(finalPayload),
