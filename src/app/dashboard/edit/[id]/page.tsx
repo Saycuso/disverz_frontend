@@ -14,6 +14,7 @@ interface Channel {
 }
 
 const EditServerPage = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const serverId = params.id;
@@ -41,7 +42,7 @@ const EditServerPage = () => {
     const fetchServerAndChannels = async () => {
       try {
         // 1. Fetch current server details
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+        
         const serverRes = await fetch(
           `${baseUrl}/api/servers/${serverId}`,
         );
@@ -50,7 +51,7 @@ const EditServerPage = () => {
 
         // 2. Fetch the live channels from Discord via our Bot
         const channelsRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/servers/${serverData.discordId}/channels`,
+          `${baseUrl}/api/servers/${serverData.discordId}/channels`,
           {
             credentials: "include",
           },
@@ -96,7 +97,7 @@ const EditServerPage = () => {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/servers/${serverId}`,
+        `${baseUrl}/api/servers/${serverId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

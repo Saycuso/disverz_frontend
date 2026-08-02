@@ -244,7 +244,7 @@ export default function Dashboard() {
           </div>
 
           <div className="lg:col-span-7">
-            <div className="bg-[#111] border border-white/5 p-1 md:p-6 rounded-xl shadow-xl w-full flex flex-col min-h-75 md:min-h-105">
+            <div className="bg-[#111] border border-white/5 p-1 md:p-6 rounded-xl shadow-xl w-full flex flex-col min-h-75 md:min-h-75">
               <h2 className="text-md md:text-lg font-bold mb-5 flex items-center gap-2 text-gray-200 border-b border-white/5 pb-3">
                 <span>🛡️</span> My Managed Servers ({myServers.length})
               </h2>
