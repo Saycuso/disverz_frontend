@@ -156,7 +156,7 @@ export default function Dashboard() {
 
   const isLoading = isAuthLoading || isGuildsLoading;
 
-  return (
+ return (
     <main className="w-full flex-1 px-0 md:px-0 py-8 relative">
       <div className="max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-8 border-b border-white/5 pb-6">
@@ -244,7 +244,8 @@ export default function Dashboard() {
           </div>
 
           <div className="lg:col-span-7">
-            <div className="bg-[#111] border border-white/5 p-1 md:p-6 rounded-xl shadow-xl w-full flex flex-col min-h-75 md:min-h-75">
+            {/* 👑 OUTER CONTAINER FIX: Added strict height for PC (md:h-[430px]) so it never collapses, while staying flexible on mobile */}
+            <div className="bg-[#111] border border-white/5 p-4 md:p-6 rounded-xl shadow-xl w-full flex flex-col min-h-[380px] md:min-h-105 md:h-[430px]">
               <h2 className="text-md md:text-lg font-bold mb-5 flex items-center gap-2 text-gray-200 border-b border-white/5 pb-3">
                 <span>🛡️</span> My Managed Servers ({myServers.length})
               </h2>
@@ -254,7 +255,7 @@ export default function Dashboard() {
                   Loading your armory...
                 </div>
               ) : myServers.length === 0 ? (
-                <div className="border border-dashed border-white/10 p-6 md:p-10 rounded-xl text-center flex flex-col items-center justify-center h-48 md:h-60">
+                <div className="border border-dashed border-white/10 p-6 md:p-10 rounded-xl text-center flex flex-col items-center justify-center flex-1">
                   <ShieldAlert className="text-gray-600 mb-3" size={28} />
                   <h3 className="text-gray-300 font-bold mb-1 text-sm md:text-base">
                     No Servers Listed Yet
@@ -266,7 +267,8 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                  {/* 👑 GRID FIX: Added `content-start` so rows pack tightly at the top instead of stretching to fill the flex container */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 content-start">
                     {myServers
                       .slice(
                         (currentPage - 1) * itemsPerPage,
@@ -301,18 +303,18 @@ export default function Dashboard() {
                         }
 
                         return (
+                          /* 👑 CARD FIX: Added strict height (`h-[135px] md:h-[145px]`) so cards NEVER stretch, regardless of server count */
                           <div
                             key={server.id}
-                            className="bg-[#1a1a1a] border border-white/5 p-2 md:p-4 rounded-xl flex flex-col justify-between hover:border-orange-500/30 transition-all group"
+                            className="bg-[#1a1a1a] border border-white/5 p-3 md:p-4 rounded-xl flex flex-col justify-between h-[135px] md:h-[145px] hover:border-orange-500/30 transition-all group"
                           >
-                            <div className="flex items-start gap-3 mb-4">
+                            <div className="flex items-start gap-3">
                               {server.iconUrl ? (
                                 <Image
                                   src={server.iconUrl}
                                   alt={server.name}
                                   width={44}
                                   height={44}
-                                  // 👑 Slightly smaller icon on mobile
                                   className="w-10 h-10 md:w-11 md:h-11 rounded-lg object-cover ring-1 ring-white/10 shrink-0"
                                 />
                               ) : (
@@ -321,7 +323,6 @@ export default function Dashboard() {
                                 </div>
                               )}
 
-                              {/* 👑 THE FIX: min-w-0 flex-1 guarantees truncation works and doesn't break the flexbox */}
                               <div className="min-w-0 flex-1">
                                 <h3 className="font-bold text-sm md:text-base leading-tight text-white group-hover:text-orange-500 transition-colors truncate">
                                   {server.name}
@@ -342,9 +343,7 @@ export default function Dashboard() {
                               </div>
                             </div>
 
-                            {/* 👑 BUTTON FIX: Shrunk vertical padding, text sizes, and border-radius for mobile */}
                             <div className="flex items-center gap-1.5 md:gap-2 mt-auto pt-2">
-                              
                               {/* 1. BUMP BUTTON */}
                               <button
                                 onClick={() => setBumpingServerId(server.id)}
@@ -379,10 +378,10 @@ export default function Dashboard() {
                                 Edit ⚙️
                               </button>
 
-                              {/* 3. VIEW PAGE BUTTON (Mobile Exclusive) */}
+                              {/* 3. VIEW PAGE BUTTON */}
                               <button
                                 onClick={() => router.push(`/servers/${server.id}`)}
-                                className=" flex-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-1.5 md:px-3 py-1.5 md:py-2 rounded-md text-[10px] font-semibold transition-all flex items-center justify-center gap-1"
+                                className="flex-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-1.5 md:px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-xs font-semibold transition-all flex items-center justify-center gap-1"
                               >
                                 View 👁️
                               </button>
@@ -392,8 +391,7 @@ export default function Dashboard() {
                       })}
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-5 md:mt-6">
-                    {/* 👑 Hides "Showing" on mobile to save space */}
+                  <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-5 md:mt-auto">
                     <span className="text-[10px] md:text-xs text-zinc-500">
                       <span className="hidden sm:inline">Showing </span>
                       <span className="text-zinc-300 font-medium">
