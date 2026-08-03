@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 import { Activity, Hash, LayoutGrid, Users } from "lucide-react";
 import Image from "next/image";
+import { LiveTimeAgo } from "@/components/LiveTimeAgo"; // Adjust path if needed!
 
 // 👑 Upgraded the interface to anticipate both new tags and old category data, plus iconUrls and inviteUrls
 interface ServerType {
@@ -21,12 +21,9 @@ export const dynamic = "force-dynamic";
 
 async function getActiveServers() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  const res = await fetch(
-    `${baseUrl}/api/servers?sort=active`,
-    {
-      cache: "no-store",
-    },
-  );
+  const res = await fetch(`${baseUrl}/api/servers?sort=active`, {
+    cache: "no-store",
+  });
   if (!res.ok) throw new Error("Failed to fetch servers");
   return res.json();
 }
@@ -158,21 +155,11 @@ export default async function Home() {
                               }`}
                             />
 
-                            {server.lastChallengeAt
-                              ? formatDistanceToNow(
-                                  new Date(server.lastChallengeAt),
-                                  { addSuffix: false },
-                                )
-                                  .replace("less than a minute", "1m")
-                                  .replace("about ", "")
-                                  .replace(" hours", "h")
-                                  .replace(" hour", "h")
-                                  .replace(" h", "h")
-                                  .replace(" minutes", "m")
-                                  .replace(" minute", "m")
-                                  .replace(" m", " m")
-                                  .replace("less than a minute", "1m")
-                              : "Never Active"}
+                            {server.lastChallengeAt ? (
+                              <LiveTimeAgo timestamp={server.lastChallengeAt} />
+                            ) : (
+                              "Never Active"
+                            )}
                           </div>
                         </div>
                       </div>
@@ -222,8 +209,8 @@ export default async function Home() {
                       href={server.inviteLink || "https://discord.gg"}
                       target="_blank"
                       rel="noopener noreferrer"
-                       className="pointer-events-auto px-4.5 py-1.5 md:px-6 md:py-2.5 bg-[#ff5500] hover:bg-[#ff7733] text-white text-[11px] md:text-sm font-black rounded-lg transition-all transform active:scale-95 group-hover/card:shadow-[0_0_15px_rgba(255,85,0,0.3)] tracking-wider uppercase cursor-pointer shrink-0"
->
+                      className="pointer-events-auto px-4.5 py-1.5 md:px-6 md:py-2.5 bg-[#ff5500] hover:bg-[#ff7733] text-white text-[11px] md:text-sm font-black rounded-lg transition-all transform active:scale-95 group-hover/card:shadow-[0_0_15px_rgba(255,85,0,0.3)] tracking-wider uppercase cursor-pointer shrink-0"
+                    >
                       Join
                     </a>
                   </div>
