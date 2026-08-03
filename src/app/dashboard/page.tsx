@@ -245,7 +245,7 @@ export default function Dashboard() {
 
           <div className="lg:col-span-7">
             {/* 👑 OUTER CONTAINER FIX: Added strict height for PC (md:h-[430px]) so it never collapses, while staying flexible on mobile */}
-            <div className="bg-[#111] border border-white/5 p-4 md:p-6 rounded-xl shadow-xl w-full flex flex-col min-h-[380px] md:min-h-105 md:h-[430px]">
+            <div className="bg-[#111] border border-white/5 p-4 md:p-6 rounded-xl shadow-xl w-full flex flex-col min-h-95in-h-105 md:h-107.5">
               <h2 className="text-md md:text-lg font-bold mb-5 flex items-center gap-2 text-gray-200 border-b border-white/5 pb-3">
                 <span>🛡️</span> My Managed Servers ({myServers.length})
               </h2>
@@ -295,7 +295,7 @@ export default function Dashboard() {
                               totalMinsLeft,
                               COOLDOWN_HOURS * 60,
                             );
-                            const hrs = Math.floor(totalMinsLeft / 60);
+                       const hrs = Math.floor(totalMinsLeft / 60);
                             const mins = totalMinsLeft % 60;
                             timeLeftText =
                               hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
@@ -306,7 +306,7 @@ export default function Dashboard() {
                           /* 👑 CARD FIX: Added strict height (`h-[135px] md:h-[145px]`) so cards NEVER stretch, regardless of server count */
                           <div
                             key={server.id}
-                            className="bg-[#1a1a1a] border border-white/5 p-3 md:p-4 rounded-xl flex flex-col justify-between h-[135px] md:h-[145px] hover:border-orange-500/30 transition-all group"
+                            className="bg-[#1a1a1a] border border-white/5 p-3 md:p-4 rounded-xl flex flex-col justify-between h-33.75 md:h-36.25 hover:border-orange-500/30 transition-all group"
                           >
                             <div className="flex items-start gap-3">
                               {server.iconUrl ? (

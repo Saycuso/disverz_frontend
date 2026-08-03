@@ -88,7 +88,7 @@ const EditServerPage = () => {
     if (serverId) {
       fetchServerAndChannels();
     }
-  }, [serverId]);
+  }, [serverId, baseUrl]);
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
