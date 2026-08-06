@@ -7,7 +7,7 @@ interface HeroProps {
 
 export default function Hero({ activeServerCount = 0 }: HeroProps) {
   return (
-    <div className="relative w-full overflow-hidden bg-[#060606] pt-8 pb-12 md:pt-16 md:pb-24 flex flex-col items-center selection:bg-orange-500/30">
+    <div className="relative w-full overflow-hidden bg-[#060606] pt-8 pb-0 md:pt-16 md:pb-24 flex flex-col items-center selection:bg-orange-500/30">
       {/* 👑 ADVANCED BACKGROUND EFFECTS */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] sm:w-[80%] max-w-200 h-75 bg-linear-to-r from-orange-500/20 via-red-500/10 to-indigo-500/20 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
@@ -71,7 +71,7 @@ export default function Hero({ activeServerCount = 0 }: HeroProps) {
         </div>
 
         {/* 👑 REAL PLATFORM STATS BAR (Replaces Fake Floating Pills) */}
-        <div className="w-full max-w-2xl bg-[#0d0d0e]/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 md:p-4 shadow-2xl flex flex-wrap items-center justify-around gap-3 text-xs md:text-sm font-bold">
+        <div className="hidden md:flex w-full max-w-2xl bg-[#0d0d0e]/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-2xl items-center justify-around gap-3 text-sm font-bold">
           {/* Stat 1: Real Live Count */}
           <div className="flex items-center gap-2">
             <Radio size={14} className="text-emerald-400 animate-pulse" />
@@ -97,7 +97,7 @@ export default function Hero({ activeServerCount = 0 }: HeroProps) {
         </div>
 
         {/* 👑 Ambient Section Divider */}
-        <div className="w-full max-w-7xl mx-auto mt-10 md:mt-14">
+        <div className="hidden w-full max-w-7xl mx-auto mt-10 md:mt-14">
           <div className="w-full h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
         </div>
       </div>
