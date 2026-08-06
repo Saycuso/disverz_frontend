@@ -92,7 +92,7 @@ export default function Hero({ activeServerCount = 0 }: HeroProps) {
           {/* Stat 3: Realtime Engine */}
           <div className="flex items-center gap-2">
             <Activity size={14} className="text-indigo-400" />
-            <span className="text-gray-300">Live Pulse Radar</span>
+            <span className="text-gray-300">Live Messages</span>
           </div>
         </div>
 

@@ -111,7 +111,7 @@ export default async function Home() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-lg md:text-2xl font-bold text-white group-hover/card:text-orange-400 transition-colors tracking-tight line-clamp-2 mb-1.5">
+                        <h3 className="text-base md:text-2xl font-bold text-white group-hover/card:text-orange-400 transition-colors tracking-tight truncate whitespace-nowrap mb-1.5 max-w-full">
                           {server.name}
                         </h3>
 
