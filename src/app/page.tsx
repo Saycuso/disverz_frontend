@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Activity, Hash, LayoutGrid, Users } from "lucide-react";
 import Image from "next/image";
-import { LiveTimeAgo } from "@/components/LiveTimeAgo"; // Adjust path if needed!
-
+import { LiveTimeAgo } from "@/components/LiveTimeAgo";
+import WhyUsCarousel from "@/components/WhyUsCarousel";
+import Hero from "@/components/Hero";
 // 👑 Upgraded the interface to anticipate both new tags and old category data, plus iconUrls and inviteUrls
 interface ServerType {
   id: string;
@@ -31,36 +32,23 @@ async function getActiveServers() {
 export default async function Home() {
   const { data: servers } = await getActiveServers();
 
+  // 👑 Real active check: counts servers where lastChallengeAt exists
+  const activeServersCount = servers.filter(
+    (server: ServerType) => server.lastChallengeAt !== null
+  ).length;
+
   return (
+    
     <main className="min-h-screen text-white px-0 md:px-0 selection:bg-orange-500/30 relative">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-175 h-87.5 bg-linear-to-r from-orange-500/10 via-red-500/5 to-indigo-500/10 rounded-full blur-[130px] pointer-events-none select-none -z-10" />
 
-      {/* Header section */}
-      <div className="max-w-7xl mx-auto mb-8 md:mb-16 text-center relative pt-4 md:pt-12">
-        <div className="inline-flex items-center justify-center p-2 md:p-3 mb-2 md:mb-4 rounded-xl md:rounded-2xl bg-[#111] border border-white/5 shadow-[0_0_20px_rgba(255,85,0,0.1)] md:shadow-[0_0_30px_rgba(255,85,0,0.15)] group relative overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-br from-[#ff5500]/10 to-[#a855f7]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-100" />
+      {/* 👑 1. THE HERO LANDING SECTION REPLACES THE OLD HEADER */}
+     <Hero activeServerCount={activeServersCount} />
+     <WhyUsCarousel />
 
-          <Image
-            src="/logo.svg"
-            alt="Disverz Logo"
-            width={60}
-            height={60}
-            className="w-10 h-10 md:w-15 md:h-15 object-contain relative z-10 group-hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight mb-4 leading-tight">
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-[#ff5500] via-[#ff7733] to-[#a855f7]">
-            Disverz
-          </span>
-        </h1>
-        <p className="text-zinc-400 text-sm sm:text-sm md:text-xl max-w-xl mx-auto leading-relaxed px-4">
-          The only server list where rank is determined by real human activity.
-          <br className="hidden md:block" /> No dead communities. No bot spam.
-        </p>
-      </div>
 
-      {/* The Pulse Feed */}
-      <div className="max-w-7xl mx-auto w-full">
+      {/* 👑 2. THE PULSE FEED (Anchored with id="live-feed") */}
+      <div id="live-feed" className="max-w-7xl mx-auto w-full pt-8 md:pt-12">
         <div className="flex items-center justify-between mb-4 md:mb-8 pb-4 border-b border-white/5">
           <div className="flex items-center gap-2 md:gap-3 text-white font-bold tracking-widest uppercase text-[10px] md:text-sm">
             <Activity

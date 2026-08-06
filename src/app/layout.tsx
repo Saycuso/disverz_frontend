@@ -21,12 +21,32 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 👑 JSON-LD Schema Object for Google Search Crawlers
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Disverz",
+    "url": "https://disverz.com",
+    "description": "Rank your Discord server based on real human activity.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://disverz.com/?search={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang="en">
       <body
         className={`${inter.className} bg-[#060606] text-white min-h-screen relative `}
       >
-        {/* The Navbar will now sit at the top of every page */}
+        {/* 👑 Injecting the JSON-LD Schema directly for global SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
+        {/* The Navbar sits at the top of every page */}
         <AuthProvider>
           <Navbar />
           <div className="w-full max-w-7xl mx-auto px-4 md:px-0 flex-1 flex flex-col">
