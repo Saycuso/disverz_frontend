@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Trash2, Bell, BellOff } from "lucide-react"; 
 import { TagInput } from "@/components/TagInput";
-import { Trash2 } from "lucide-react"; 
 
 interface Channel {
   id: string;
@@ -28,33 +27,27 @@ const EditServerPage = () => {
 
   // Form State
   const [formData, setFormData] = useState({
-    name: "", // Read-only for display
+    name: "",
     description: "",
-    tags: [] as string[], // Handled as comma-separated string in UI
+    tags: [] as string[],
     category: "gaming",
     language: "English",
     welcomeChannelId: "",
     challengeChannelId: "",
+    bumpReminders: true, 
   });
   const [isDescTouched, setIsDescTouched] = useState(false);
 
   useEffect(() => {
     const fetchServerAndChannels = async () => {
       try {
-        // 1. Fetch current server details
-        
-        const serverRes = await fetch(
-          `${baseUrl}/api/servers/${serverId}`,
-        );
+        const serverRes = await fetch(`${baseUrl}/api/servers/${serverId}`);
         if (!serverRes.ok) throw new Error("Failed to fetch server details");
         const serverData = await serverRes.json();
 
-        // 2. Fetch the live channels from Discord via our Bot
         const channelsRes = await fetch(
           `${baseUrl}/api/servers/${serverData.discordId}/channels`,
-          {
-            credentials: "include",
-          },
+          { credentials: "include" }
         );
 
         if (channelsRes.ok) {
@@ -64,15 +57,15 @@ const EditServerPage = () => {
           console.warn("Could not fetch channels. Bot might lack permissions.");
         }
 
-        // 3. Populate the form
         setFormData({
           name: serverData.name,
           description: serverData.description || "",
           tags: serverData.tags || [],
           language: serverData.language || "English",
-          category: serverData.category || "gaming", 
+          category: serverData.category || "gaming",
           welcomeChannelId: serverData.welcomeChannelId || "",
           challengeChannelId: serverData.challengeChannelId || "",
+          bumpReminders: serverData.bumpReminders ?? true,
         });
       } catch (err) {
         if (err instanceof Error) {
@@ -96,29 +89,26 @@ const EditServerPage = () => {
     setError(null);
 
     try {
-      const res = await fetch(
-        `${baseUrl}/api/servers/${serverId}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            description: formData.description,
-            tags: formData.tags,
-            category: formData.category, 
-            language: formData.language,
-            welcomeChannelId: formData.welcomeChannelId,
-            challengeChannelId: formData.challengeChannelId,
-          }),
-        },
-      );
+      const res = await fetch(`${baseUrl}/api/servers/${serverId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          description: formData.description,
+          tags: formData.tags,
+          category: formData.category,
+          language: formData.language,
+          welcomeChannelId: formData.welcomeChannelId,
+          challengeChannelId: formData.challengeChannelId,
+          bumpReminders: formData.bumpReminders, 
+        }),
+      });
 
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || "Failed to update server");
       }
 
-      // Tactical retreat back to the armory upon success
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error) {
@@ -130,12 +120,10 @@ const EditServerPage = () => {
     }
   };
 
-  // 👑 The Destructive Strike
   const handleDelete = async () => {
-    // The Safeguard
     if (
       !window.confirm(
-        "Are you absolutely sure you want to delete this server? This will wipe all pulse data and rankings. This action cannot be undone.",
+        "Are you absolutely sure you want to delete this server? This will wipe all pulse data and rankings. This action cannot be undone."
       )
     ) {
       return;
@@ -145,21 +133,16 @@ const EditServerPage = () => {
     setError(null);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(
-        `${baseUrl}/api/servers/${serverId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const res = await fetch(`${baseUrl}/api/servers/${serverId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || "Failed to delete server");
       }
 
-      // Tactical retreat back to the dashboard after successful wipe
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error) {
@@ -184,7 +167,7 @@ const EditServerPage = () => {
   return (
     <div className="text-white px-0 md:px-0 py-6 md:py-8 flex flex-col justify-center items-center">
       <div className="max-w-7xl w-full">
-        {/* Header Block with Mobile Scaling */}
+        {/* Header Block */}
         <div className="mb-6">
           <Link
             href="/dashboard"
@@ -206,7 +189,6 @@ const EditServerPage = () => {
           </div>
         )}
 
-        {/* 🚀 THE TACTICAL TWO-COLUMN DASHBOARD */}
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6 w-full"
@@ -235,7 +217,6 @@ const EditServerPage = () => {
                 placeholder="What makes your community unique? (Min. 200 characters)"
               />
 
-              {/* 👑 Dynamic Footer: Flex-col on mobile so the warning doesn't break the layout */}
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-1.5 px-1 gap-1 sm:gap-0">
                 <span className="text-[10px] md:text-[11px] font-bold">
                   {isDescTouched && formData.description.trim().length < 200 ? (
@@ -355,34 +336,73 @@ const EditServerPage = () => {
                 </p>
               </div>
 
-              {/* Challenge Target Box */}
-              <div>
-                <label className="block text-[10px] md:text-xs font-semibold text-gray-300 mb-1 md:mb-1.5">
-                  Challenge Channel
-                </label>
-                <select
-                  required
-                  value={formData.challengeChannelId}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      challengeChannelId: e.target.value,
-                    })
-                  }
-                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm text-white focus:outline-none focus:border-[#ff5500] transition-colors h-10 md:h-11 cursor-pointer"
-                >
-                  <option value="" disabled>
-                    Select a channel...
-                  </option>
-                  {channels.map((channel) => (
-                    <option key={channel.id} value={channel.id}>
-                      # {channel.name}
+              {/* 👑 ACTION CHANNEL & REMINDERS (Side-by-Side Grid) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+                
+                {/* 1. Bot Action / Challenge Channel Dropdown */}
+                <div>
+                  <label className="block text-[10px] md:text-xs font-semibold text-gray-300 mb-1 md:mb-1.5">
+                    Bot Action Channel
+                  </label>
+                  <select
+                    required
+                    value={formData.challengeChannelId}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        challengeChannelId: e.target.value,
+                      })
+                    }
+                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-2 md:px-3 py-2 text-xs md:text-sm text-white focus:outline-none focus:border-[#ff5500] transition-colors h-10 md:h-11 cursor-pointer"
+                  >
+                    <option value="" disabled>
+                      Select...
                     </option>
-                  ))}
-                </select>
-                <p className="text-[10px] md:text-xs text-gray-500 mt-1.5 md:mt-1 leading-tight">
-                  Bot drops /challenge questions here.
-                </p>
+                    {channels.map((channel) => (
+                      <option key={channel.id} value={channel.id}>
+                        # {channel.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] md:text-[11px] text-gray-500 mt-1.5 leading-tight">
+                    For /challenge & bumps.
+                  </p>
+                </div>
+
+                {/* 2. Bump Reminder Toggle Card */}
+                <div>
+                  <label className="block text-[10px] md:text-xs font-semibold text-gray-300 mb-1 md:mb-1.5">
+                    Bump Reminders
+                  </label>
+                  <div className="flex items-center justify-between px-3 bg-[#1a1a1a] border border-white/10 rounded-lg h-10 md:h-11">
+                    <div className="flex items-center gap-2">
+                      <div className={`transition-colors ${formData.bumpReminders ? 'text-orange-500' : 'text-gray-500'}`}>
+                        {formData.bumpReminders ? <Bell size={14} className="md:w-4 md:h-4" /> : <BellOff size={14} className="md:w-4 md:h-4" />}
+                      </div>
+                      <span className="text-white text-[10px] md:text-xs font-bold uppercase tracking-wider">
+                        {formData.bumpReminders ? "ON" : "OFF"}
+                      </span>
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, bumpReminders: !formData.bumpReminders })}
+                      className={`relative inline-flex h-5 w-9 md:h-6 md:w-11 items-center rounded-full transition-colors focus:outline-none ${
+                        formData.bumpReminders ? 'bg-orange-500' : 'bg-gray-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-3.5 w-3.5 md:h-4 md:w-4 transform rounded-full bg-white transition-transform ${
+                          formData.bumpReminders ? 'translate-x-4 md:translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  <p className="text-[10px] md:text-[11px] text-gray-500 mt-1.5 leading-tight">
+                    {formData.bumpReminders ? "Active in Action Channel." : "Reminders paused."}
+                  </p>
+                </div>
+
               </div>
             </div>
 
@@ -395,7 +415,7 @@ const EditServerPage = () => {
               {isSaving ? "Saving Configuration..." : "Save Changes"}
             </button>
 
-            {/* 👑 DANGER ZONE: The Kill Switch */}
+            {/* DANGER ZONE */}
             <div className="mt-5 pt-4 md:pt-5 border-t border-red-500/20">
               <button
                 type="button"

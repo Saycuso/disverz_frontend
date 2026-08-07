@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Settings, ChevronLeft } from "lucide-react";
+import { Settings, ChevronLeft, Bell, BellOff } from "lucide-react";
 import {TagInput} from "@/components/TagInput";
 import Image from "next/image";
 
@@ -21,7 +21,8 @@ export default function SetupServer() {
   const [language, setLanguage] = useState("English");
   const [category, setCategory] = useState("gaming");
   const [tags, setTags] = useState<string[]>([]);
-  const [isDescTouched, setIsDescTouched] = useState(false); // 👑 ADD THIS
+  const [isDescTouched, setIsDescTouched] = useState(false); 
+  const [bumpReminders, setBumpReminders] = useState(true); 
 
 // The Identity State
   const [serverName, setServerName] = useState("Loading...");
@@ -71,7 +72,8 @@ export default function SetupServer() {
       description,
       tags,
       category,
-      language
+      language,
+      bumpReminders
     }));
 
     // Construct the Discord Bot Authorization URL
@@ -212,6 +214,35 @@ return (
 
               <div className="border-b border-white/5 pt-2" />
 
+              {/* 👑 BUMP REMINDER SETTING (Local State for Setup) */}
+              <div className="flex items-center justify-between p-3 md:p-4 bg-[#1a1a1a] border border-white/10 rounded-lg md:rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${bumpReminders ? 'bg-orange-500/20 text-orange-500' : 'bg-white/5 text-gray-500'}`}>
+                    {bumpReminders ? <Bell size={18} /> : <BellOff size={18} />}
+                  </div>
+                  <div>
+                    <h4 className="text-white text-[10px] md:text-xs font-bold uppercase tracking-wider">Bump Reminders</h4>
+                    <p className="text-[10px] md:text-[11px] text-gray-400 mt-0.5">
+                      {bumpReminders ? "We'll ping you when it's time." : "Reminders are paused."}
+                    </p>
+                  </div>
+                </div>
+                
+                <button
+                  type="button" // Important: type="button" prevents it from submitting the form!
+                  onClick={() => setBumpReminders(!bumpReminders)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                    bumpReminders ? 'bg-orange-500' : 'bg-gray-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      bumpReminders ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
               {/* Discord Gateway Submission Action */}
               <button
                 type="submit"
@@ -289,5 +320,4 @@ return (
       </div>
     </main>
   );
-
 }
