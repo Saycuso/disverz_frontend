@@ -275,7 +275,7 @@ export default function Dashboard() {
                         currentPage * itemsPerPage,
                       )
                       .map((server) => {
-                        const COOLDOWN_HOURS = 0;
+                        const COOLDOWN_HOURS = 2;
                         let isOnCooldown = false;
                         let timeLeftText = "";
 
